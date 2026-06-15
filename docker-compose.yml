@@ -1,15 +1,55 @@
 version: "3.9"
 
 services:
-frontend:
-container_name: evicpay-frontend
-build:
-context: ./frontend
-ports:
-- "3000:3000"
+  frontend:
+    container_name: evicpay-frontend
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    container_name: evicpay-backend
+    build:
+      context: ./backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: evicpay
+      DATABASE_USER: evicpay
+      DATABASE_PASSWORD: evicpay
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    container_name: evicpay-postgres
+    image: postgres:17-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: evicpay
+      POSTGRES_USER: evicpay
+      POSTGRES_PASSWORD: evicpay
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
 volumes:
-- ./frontend:/app
-- /app/node_modules
-environment:
-NODE_ENV: development
-restart: unless-stopped
+  postgres_data:
+
+  
